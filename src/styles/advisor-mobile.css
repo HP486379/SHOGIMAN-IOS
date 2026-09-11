@@ -1,0 +1,85 @@
+.tactic-transmission {
+  position: fixed;
+  z-index: 66;
+  left: 50%;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  width: min(456px, calc(100% - 24px));
+  transform: translateX(-50%);
+  padding: 11px 12px 10px;
+  border: 2px solid #21d9d0;
+  border-radius: 8px;
+  background: rgba(3, 16, 20, .97);
+  color: #d8f7f5;
+  box-shadow:
+    0 0 0 1px rgba(67, 255, 201, .22),
+    0 0 20px rgba(30, 216, 213, .44),
+    inset 0 0 18px rgba(27, 216, 213, .09);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.transmission-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #68f6f1;
+  font-size: 10px;
+  margin-bottom: 7px;
+}
+
+.transmission-head b {
+  flex: 0 0 auto;
+  color: #f4e65a;
+  font-size: 8px;
+  border: 1px solid #c9b93a;
+  border-radius: 3px;
+  padding: 3px 4px;
+  background: rgba(34, 29, 4, .88);
+}
+
+.tactic-transmission p {
+  margin: 0 0 6px;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.tactic-transmission small {
+  display: block;
+  margin-top: 4px;
+  color: #6ba0a2;
+  font-size: 7px;
+  text-align: right;
+}
+
+.bottom-nav button { position: relative; }
+.bottom-nav button.has-unread {
+  border-color: #20dacd;
+  box-shadow: 0 0 13px rgba(32, 218, 205, .28), inset 0 0 9px rgba(32, 218, 205, .08);
+}
+.unread-dot {
+  position: absolute;
+  right: 18%;
+  top: 9px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffde37;
+  box-shadow: 0 0 8px #ffde37;
+}
+
+.advisor-result p {
+  margin: 0 0 8px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tactic-transmission {
+    animation: incoming-radio 1.35s ease-out both;
+  }
+  @keyframes incoming-radio {
+    0% { opacity: 0; transform: translateX(-50%) translateY(16px) scale(.98); box-shadow: 0 0 0 rgba(30,216,213,0); }
+    18% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.01); box-shadow: 0 0 32px rgba(74,255,185,.72); }
+    48% { transform: translateX(-50%) scale(1); box-shadow: 0 0 25px rgba(30,216,213,.56); }
+    100% { opacity: 1; transform: translateX(-50%) scale(1); box-shadow: 0 0 20px rgba(30,216,213,.44); }
+  }
+}
