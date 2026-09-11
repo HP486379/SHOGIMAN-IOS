@@ -49,7 +49,10 @@ function HandBar({ title, hand, cpu, selected, onSelect }: {
 function MiniGuide({ piece, pos }: { piece: Piece; pos: Position }) {
   const left = Math.min(82, Math.max(18, ((pos.col + 0.5) / 9) * 100));
   const below = pos.row <= 3;
-  const style = { '--guide-left': `${left}%`, '--guide-row': pos.row } as CSSProperties;
+  const edge = below ? ((pos.row + 1.15) / 9) * 100 : ((9 - pos.row + 0.15) / 9) * 100;
+  const style: CSSProperties = below
+    ? { left: `${left}%`, top: `${edge}%` }
+    : { left: `${left}%`, bottom: `${edge}%` };
   return (
     <div className={`mini-guide ${below ? 'mini-guide-below' : 'mini-guide-above'}`} style={style} aria-live="polite">
       <img src={getUnitIcon(piece)} alt="" />
@@ -104,7 +107,7 @@ function Board({ mode, inspected, onInspect }: {
           );
         }))}
       </div>
-      {inspectedPiece && inspected && inspected.row >= 0 && <MiniGuide piece={inspectedPiece} pos={inspected} />}
+      {inspectedPiece && inspected && <MiniGuide piece={inspectedPiece} pos={inspected} />}
     </div>
   );
 }
