@@ -1,4 +1,4 @@
-import { CSSProperties, useMemo, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useState } from 'react';
 import { getBattlefieldPieceTypeIcon, getBattlefieldUnitIcon } from './assets/battlefieldUnitIcons';
 import { UNIT_GUIDE_PANEL_IMAGE } from './assets/unitGuidePanelImage';
 import { useMobileAdvisor } from './hooks/useMobileAdvisor';
@@ -12,6 +12,7 @@ type MobileAdvisor = ReturnType<typeof useMobileAdvisor>;
 const PIECE_ORDER: PieceType[] = ['pawn', 'lance', 'knight', 'silver', 'gold', 'bishop', 'rook', 'king'];
 const GUIDE_CROP_WIDTH = 44.9;
 const GUIDE_CROP_HEIGHT = 18.9;
+const MINI_GUIDE_VISIBLE_MS = 1600;
 
 const GUIDE_REGION: Record<PieceType, { left: number; top: number }> = {
   pawn: { left: 5.1, top: 15.9 },
@@ -249,6 +250,12 @@ export default function App() {
   const inspectedPiece = normalizedInspected ? state.board[normalizedInspected.row]?.[normalizedInspected.col] ?? null : null;
   const selectedBoardPiece = state.selectedPos ? state.board[state.selectedPos.row]?.[state.selectedPos.col] ?? null : null;
   const activeGuideType = state.selectedHandPiece ?? inspectedPiece?.type ?? selectedBoardPiece?.type ?? null;
+
+  useEffect(() => {
+    if (!inspected || inspected.row < 0) return;
+    const timer = window.setTimeout(() => setInspected(null), MINI_GUIDE_VISIBLE_MS);
+    return () => window.clearTimeout(timer);
+  }, [inspected]);
 
   function openAi() {
     advisor.markRead();
