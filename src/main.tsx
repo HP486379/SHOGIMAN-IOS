@@ -4,6 +4,7 @@ import App from './App';
 import './styles/mobile.css';
 import './styles/unit-side.css';
 import './styles/advisor-mobile.css';
+import './styles/battle-effects.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
