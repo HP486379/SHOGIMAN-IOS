@@ -1,14 +1,28 @@
 import { CSSProperties, useMemo, useState } from 'react';
 import { getBattlefieldPieceTypeIcon, getBattlefieldUnitIcon } from './assets/battlefieldUnitIcons';
+import { UNIT_GUIDE_PANEL_IMAGE } from './assets/unitGuidePanelImage';
 import { useMobileAdvisor } from './hooks/useMobileAdvisor';
 import { useShogi } from './hooks/useShogi';
 import { CpuLevel, DisplayMode, EffectKind, Piece, PieceType, Position } from './types/shogi';
-import { getPieceKanji, PIECE_KANJI, UNIT_CODE, UNIT_NAME_EN, UNIT_NAME_JA } from './utils/pieceLabels';
+import { getPieceKanji, UNIT_CODE } from './utils/pieceLabels';
 
 type Sheet = 'ai' | 'guide' | 'settings' | null;
 type MobileAdvisor = ReturnType<typeof useMobileAdvisor>;
 
 const PIECE_ORDER: PieceType[] = ['pawn', 'lance', 'knight', 'silver', 'gold', 'bishop', 'rook', 'king'];
+const GUIDE_CROP_WIDTH = 44.9;
+const GUIDE_CROP_HEIGHT = 18.9;
+
+const GUIDE_REGION: Record<PieceType, { left: number; top: number }> = {
+  pawn: { left: 5.1, top: 15.9 },
+  lance: { left: 51.4, top: 15.9 },
+  knight: { left: 5.1, top: 36.2 },
+  silver: { left: 51.4, top: 36.2 },
+  gold: { left: 5.1, top: 56.4 },
+  bishop: { left: 51.4, top: 56.4 },
+  rook: { left: 5.1, top: 76.7 },
+  king: { left: 51.4, top: 76.7 },
+};
 
 function samePos(a: Position | null, row: number, col: number) {
   return Boolean(a && a.row === row && a.col === col);
@@ -23,6 +37,21 @@ function effectSymbol(kind: EffectKind) {
   if (kind === 'cross') return '╋';
   if (kind === 'diagonal') return '✦';
   return '◆';
+}
+
+function GuideArtwork({ type, className = '' }: { type: PieceType; className?: string }) {
+  const region = GUIDE_REGION[type];
+  const imageStyle: CSSProperties = {
+    width: `${10000 / GUIDE_CROP_WIDTH}%`,
+    left: `${-(region.left / GUIDE_CROP_WIDTH) * 100}%`,
+    top: `${-(region.top / GUIDE_CROP_HEIGHT) * 100}%`,
+  };
+
+  return (
+    <span className={`guide-art-crop ${className}`} aria-hidden="true">
+      <img className="guide-art-source" src={UNIT_GUIDE_PANEL_IMAGE} style={imageStyle} alt="" draggable={false} />
+    </span>
+  );
 }
 
 function HandBar({ title, hand, cpu, selected, onSelect }: {
@@ -56,20 +85,17 @@ function HandBar({ title, hand, cpu, selected, onSelect }: {
 }
 
 function MiniGuide({ piece, pos }: { piece: Piece; pos: Position }) {
-  const left = Math.min(82, Math.max(18, ((pos.col + 0.5) / 9) * 100));
+  const left = Math.min(76, Math.max(24, ((pos.col + 0.5) / 9) * 100));
   const below = pos.row <= 3;
-  const edge = below ? ((pos.row + 1.15) / 9) * 100 : ((9 - pos.row + 0.15) / 9) * 100;
+  const edge = below ? ((pos.row + 1.12) / 9) * 100 : ((9 - pos.row + 0.12) / 9) * 100;
   const style: CSSProperties = below
     ? { left: `${left}%`, top: `${edge}%` }
     : { left: `${left}%`, bottom: `${edge}%` };
+
   return (
-    <div className={`mini-guide ${below ? 'mini-guide-below' : 'mini-guide-above'}`} style={style} aria-live="polite">
-      <img src={getBattlefieldUnitIcon(piece)} alt="" />
-      <div className="mini-guide-copy">
-        <strong>{getPieceKanji(piece)} / {UNIT_CODE[piece.type]}</strong>
-        <span>{piece.promoted ? `強化${UNIT_NAME_JA[piece.type]}` : UNIT_NAME_JA[piece.type]}</span>
-        <small>{UNIT_NAME_EN[piece.type]}</small>
-      </div>
+    <div className={`mini-guide mini-guide-original ${below ? 'mini-guide-below' : 'mini-guide-above'}`} style={style} aria-live="polite">
+      <GuideArtwork type={piece.type} className="mini-guide-art" />
+      {piece.promoted && <span className="mini-guide-upgrade">UPGRADED</span>}
     </div>
   );
 }
@@ -101,7 +127,7 @@ function Board({ mode, inspected, onInspect }: {
             <button
               type="button"
               role="gridcell"
-              className={`board-cell ${effect ? `effect-${effect.kind}` : ''} ${selected ? 'selected' : ''} ${last ? 'last-move' : ''}`}
+              className={`board-cell ${effect ? `effect-${effect.kind} legal-target` : ''} ${selected ? 'selected' : ''} ${last ? 'last-move' : ''}`}
               key={`${rowIndex}-${colIndex}`}
               onClick={() => onCell(rowIndex, colIndex)}
             >
@@ -137,12 +163,34 @@ function useShogiContext() {
   return shogiContext;
 }
 
-function SheetPanel({ sheet, onClose, mode, setMode, advisor }: {
+function FullGuide({ activeType }: { activeType: PieceType | null }) {
+  const activeRegion = activeType ? GUIDE_REGION[activeType] : null;
+  return (
+    <div className="full-guide-image-wrap">
+      <img className="full-guide-image" src={UNIT_GUIDE_PANEL_IMAGE} alt="UNIT GUIDE 駒対応図" draggable={false} />
+      {activeRegion && (
+        <span
+          className="full-guide-highlight"
+          style={{
+            left: `${activeRegion.left}%`,
+            top: `${activeRegion.top}%`,
+            width: `${GUIDE_CROP_WIDTH}%`,
+            height: `${GUIDE_CROP_HEIGHT}%`,
+          }}
+          aria-hidden="true"
+        />
+      )}
+    </div>
+  );
+}
+
+function SheetPanel({ sheet, onClose, mode, setMode, advisor, activeGuideType }: {
   sheet: Exclude<Sheet, null>;
   onClose: () => void;
   mode: DisplayMode;
   setMode: (mode: DisplayMode) => void;
   advisor: MobileAdvisor;
+  activeGuideType: PieceType | null;
 }) {
   const { state, reset, toggleSE, setCpuLevel } = useShogiContext();
   const sourceLabel = advisor.source === 'loading' ? 'ANALYZING...' : advisor.source === 'openai' ? 'GPT-5.4 MINI' : advisor.source === 'error' ? 'API ERR' : 'STANDBY';
@@ -169,14 +217,7 @@ function SheetPanel({ sheet, onClose, mode, setMode, advisor }: {
         {sheet === 'guide' && (
           <>
             <div className="sheet-heading"><span>UNIT GUIDE</span><button onClick={onClose}>×</button></div>
-            <div className="guide-grid">
-              {PIECE_ORDER.map(type => (
-                <article className="guide-card" key={type}>
-                  <img src={getBattlefieldPieceTypeIcon(type)} alt="" />
-                  <div><strong>{PIECE_KANJI[type]} / {UNIT_CODE[type]}</strong><span>{UNIT_NAME_JA[type]}</span><small>{UNIT_NAME_EN[type]}</small></div>
-                </article>
-              ))}
-            </div>
+            <FullGuide activeType={activeGuideType} />
           </>
         )}
         {sheet === 'settings' && (
@@ -205,6 +246,9 @@ export default function App() {
   const score = useMemo(() => String(state.moveCount * 100).padStart(6, '0'), [state.moveCount]);
   const turn = state.currentPlayer === 'black' ? '1P' : 'CPU';
   const normalizedInspected = inspected && inspected.row >= 0 ? inspected : null;
+  const inspectedPiece = normalizedInspected ? state.board[normalizedInspected.row]?.[normalizedInspected.col] ?? null : null;
+  const selectedBoardPiece = state.selectedPos ? state.board[state.selectedPos.row]?.[state.selectedPos.col] ?? null : null;
+  const activeGuideType = state.selectedHandPiece ?? inspectedPiece?.type ?? selectedBoardPiece?.type ?? null;
 
   function openAi() {
     advisor.markRead();
@@ -251,7 +295,7 @@ export default function App() {
           <div className="promotion-dialog"><strong>UNIT UPGRADE?</strong><span>敵陣で強化可能です。</span><div><button onClick={() => answerPromotion(true)}>UPGRADE</button><button onClick={() => answerPromotion(false)}>KEEP</button></div></div>
         </div>
       )}
-      {sheet && <SheetPanel sheet={sheet} onClose={() => setSheet(null)} mode={mode} setMode={setMode} advisor={advisor} />}
+      {sheet && <SheetPanel sheet={sheet} onClose={() => setSheet(null)} mode={mode} setMode={setMode} advisor={advisor} activeGuideType={activeGuideType} />}
     </main>
   );
 }
