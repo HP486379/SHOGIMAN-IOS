@@ -1,10 +1,12 @@
 import { CSSProperties, useMemo, useState } from 'react';
 import { getPieceTypeIcon, getUnitIcon } from './assets/unitIcons';
+import { useMobileAdvisor } from './hooks/useMobileAdvisor';
 import { useShogi } from './hooks/useShogi';
 import { CpuLevel, DisplayMode, Piece, PieceType, Position } from './types/shogi';
 import { getPieceKanji, PIECE_KANJI, UNIT_CODE, UNIT_NAME_EN, UNIT_NAME_JA } from './utils/pieceLabels';
 
 type Sheet = 'ai' | 'guide' | 'settings' | null;
+type MobileAdvisor = ReturnType<typeof useMobileAdvisor>;
 
 const PIECE_ORDER: PieceType[] = ['pawn', 'lance', 'knight', 'silver', 'gold', 'bishop', 'rook', 'king'];
 
@@ -118,13 +120,16 @@ function useShogiContext() {
   return shogiContext;
 }
 
-function SheetPanel({ sheet, onClose, mode, setMode }: {
+function SheetPanel({ sheet, onClose, mode, setMode, advisor }: {
   sheet: Exclude<Sheet, null>;
   onClose: () => void;
   mode: DisplayMode;
   setMode: (mode: DisplayMode) => void;
+  advisor: MobileAdvisor;
 }) {
   const { state, reset, toggleSE, setCpuLevel } = useShogiContext();
+  const sourceLabel = advisor.source === 'loading' ? 'ANALYZING...' : advisor.source === 'openai' ? 'GPT-5.4 MINI' : advisor.source === 'error' ? 'API ERR' : 'STANDBY';
+  const canAnalyze = state.currentPlayer === 'black' && !state.pendingPromotion && advisor.source !== 'loading';
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <section className="bottom-sheet" onClick={event => event.stopPropagation()}>
@@ -132,9 +137,16 @@ function SheetPanel({ sheet, onClose, mode, setMode }: {
         {sheet === 'ai' && (
           <>
             <div className="sheet-heading"><span>AI TACTIC ADVISOR</span><button onClick={onClose}>×</button></div>
-            <div className="advisor-state">STANDBY <b>BALANCED</b></div>
-            <p className="advisor-copy">重要局面では盤面上に短い通信を表示します。GPT-5.4 mini のイベント駆動連携は次の実装フェーズで接続します。</p>
-            <button className="primary-action" disabled>ANALYZE — API LINK NEXT</button>
+            <div className="advisor-state">{sourceLabel} <b>{advisor.evaluation}</b></div>
+            {advisor.latestAdvice ? (
+              <div className="advisor-copy advisor-result">
+                <p>{advisor.latestAdvice.summary}</p>
+                {advisor.latestAdvice.bullets[0] && <p>{advisor.latestAdvice.bullets[0]}</p>}
+              </div>
+            ) : (
+              <p className="advisor-copy">重要な局面変化を検知した時だけAI参謀が自動介入します。必要ならANALYZEで現在局面を確認できます。</p>
+            )}
+            <button className="primary-action" disabled={!canAnalyze} onClick={advisor.analyze}>{advisor.source === 'loading' ? 'ANALYZING...' : 'ANALYZE'}</button>
           </>
         )}
         {sheet === 'guide' && (
@@ -168,6 +180,7 @@ export default function App() {
   const game = useShogi();
   shogiContext = game;
   const { state, selectHandPiece, answerPromotion, setCpuLevel } = game;
+  const advisor = useMobileAdvisor(state);
   const [mode, setMode] = useState<DisplayMode>('military');
   const [sheet, setSheet] = useState<Sheet>(null);
   const [inspected, setInspected] = useState<Position | null>(null);
@@ -175,6 +188,12 @@ export default function App() {
   const score = useMemo(() => String(state.moveCount * 100).padStart(6, '0'), [state.moveCount]);
   const turn = state.currentPlayer === 'black' ? '1P' : 'CPU';
   const normalizedInspected = inspected && inspected.row >= 0 ? inspected : null;
+
+  function openAi() {
+    advisor.markRead();
+    advisor.dismissTransmission();
+    setSheet('ai');
+  }
 
   return (
     <main className="ios-shell">
@@ -192,11 +211,20 @@ export default function App() {
         <HandBar title="1P CAPTURED" hand={state.hands.black} selected={state.selectedHandPiece} onSelect={selectHandPiece} />
       </section>
 
+      {advisor.transmission && (
+        <div className="tactic-transmission" role="status" aria-live="polite" onClick={openAi}>
+          <div className="transmission-head"><span>⚡ TACTIC ADVISOR</span><b>{advisor.evaluation}</b></div>
+          <p>{advisor.transmission.summary}</p>
+          {advisor.transmission.bullets[0] && <p>{advisor.transmission.bullets[0]}</p>}
+          <small>TAP TO OPEN · AUTO CLOSE</small>
+        </div>
+      )}
+
       {state.checkPlayer === 'black' && <div className="radio-alert">⚡ TACTIC ALERT · HQ UNDER DIRECT ATTACK</div>}
       {state.gameOverWinner && <div className="radio-alert victory">{state.gameOverWinner === 'black' ? 'MISSION COMPLETE · 1P VICTORY' : 'MISSION FAILED · CPU VICTORY'}</div>}
 
       <nav className="bottom-nav" aria-label="Battle tools">
-        <button onClick={() => setSheet('ai')}><span>◆</span>AI</button>
+        <button onClick={openAi} className={advisor.unread ? 'has-unread' : ''}><span>◆</span>AI{advisor.unread && <i className="unread-dot" />}</button>
         <button onClick={() => setSheet('guide')}><span>▣</span>GUIDE</button>
         <button onClick={() => setSheet('settings')}><span>⚙</span>SET</button>
       </nav>
@@ -206,7 +234,7 @@ export default function App() {
           <div className="promotion-dialog"><strong>UNIT UPGRADE?</strong><span>敵陣で強化可能です。</span><div><button onClick={() => answerPromotion(true)}>UPGRADE</button><button onClick={() => answerPromotion(false)}>KEEP</button></div></div>
         </div>
       )}
-      {sheet && <SheetPanel sheet={sheet} onClose={() => setSheet(null)} mode={mode} setMode={setMode} />}
+      {sheet && <SheetPanel sheet={sheet} onClose={() => setSheet(null)} mode={mode} setMode={setMode} advisor={advisor} />}
     </main>
   );
 }
