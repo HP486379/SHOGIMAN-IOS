@@ -52,3 +52,5 @@ npm run build
 ```
 
 Current stack: React + TypeScript + Vite. Capacitor will be added after the portrait Web shell is stable enough to package as an iOS app.
+
+Preview deployments are generated from feature branches during UI validation.
