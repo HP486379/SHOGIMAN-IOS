@@ -1,8 +1,8 @@
 import { CSSProperties, useMemo, useState } from 'react';
-import { getPieceTypeIcon, getUnitIcon } from './assets/unitIcons';
+import { getBattlefieldPieceTypeIcon, getBattlefieldUnitIcon } from './assets/battlefieldUnitIcons';
 import { useMobileAdvisor } from './hooks/useMobileAdvisor';
 import { useShogi } from './hooks/useShogi';
-import { CpuLevel, DisplayMode, Piece, PieceType, Position } from './types/shogi';
+import { CpuLevel, DisplayMode, EffectKind, Piece, PieceType, Position } from './types/shogi';
 import { getPieceKanji, PIECE_KANJI, UNIT_CODE, UNIT_NAME_EN, UNIT_NAME_JA } from './utils/pieceLabels';
 
 type Sheet = 'ai' | 'guide' | 'settings' | null;
@@ -16,6 +16,13 @@ function samePos(a: Position | null, row: number, col: number) {
 
 function groupHand(hand: PieceType[]) {
   return PIECE_ORDER.map(type => ({ type, count: hand.filter(item => item === type).length })).filter(item => item.count > 0);
+}
+
+function effectSymbol(kind: EffectKind) {
+  if (kind === 'capture') return '✕';
+  if (kind === 'cross') return '╋';
+  if (kind === 'diagonal') return '✦';
+  return '◆';
 }
 
 function HandBar({ title, hand, cpu, selected, onSelect }: {
@@ -38,7 +45,7 @@ function HandBar({ title, hand, cpu, selected, onSelect }: {
             onClick={() => onSelect?.(type)}
             disabled={!onSelect}
           >
-            <img src={getPieceTypeIcon(type)} alt="" />
+            <img src={getBattlefieldPieceTypeIcon(type)} alt="" />
             <span>{UNIT_CODE[type]}</span>
             <b>×{count}</b>
           </button>
@@ -57,7 +64,7 @@ function MiniGuide({ piece, pos }: { piece: Piece; pos: Position }) {
     : { left: `${left}%`, bottom: `${edge}%` };
   return (
     <div className={`mini-guide ${below ? 'mini-guide-below' : 'mini-guide-above'}`} style={style} aria-live="polite">
-      <img src={getUnitIcon(piece)} alt="" />
+      <img src={getBattlefieldUnitIcon(piece)} alt="" />
       <div className="mini-guide-copy">
         <strong>{getPieceKanji(piece)} / {UNIT_CODE[piece.type]}</strong>
         <span>{piece.promoted ? `強化${UNIT_NAME_JA[piece.type]}` : UNIT_NAME_JA[piece.type]}</span>
@@ -73,7 +80,7 @@ function Board({ mode, inspected, onInspect }: {
   onInspect: (pos: Position) => void;
 }) {
   const { state, handleCellClick } = useShogiContext();
-  const inspectedPiece = inspected ? state.board[inspected.row][inspected.col] : null;
+  const inspectedPiece = inspected ? state.board[inspected.row]?.[inspected.col] ?? null : null;
 
   function onCell(row: number, col: number) {
     const piece = state.board[row][col];
@@ -89,6 +96,7 @@ function Board({ mode, inspected, onInspect }: {
           const effect = state.effects.find(item => item.position.row === rowIndex && item.position.col === colIndex);
           const selected = samePos(state.selectedPos, rowIndex, colIndex);
           const last = samePos(state.lastMove?.to ?? null, rowIndex, colIndex);
+          const captureExplosion = samePos(state.captureEffect, rowIndex, colIndex);
           return (
             <button
               type="button"
@@ -97,9 +105,18 @@ function Board({ mode, inspected, onInspect }: {
               key={`${rowIndex}-${colIndex}`}
               onClick={() => onCell(rowIndex, colIndex)}
             >
+              {effect && <span className={`effect-marker ${effect.kind}`}>{effectSymbol(effect.kind)}</span>}
+              {captureExplosion && (
+                <span className="bomb-explosion" aria-hidden="true">
+                  <span className="bomb-core">●</span>
+                  <span className="bomb-spark spark-1">✹</span>
+                  <span className="bomb-spark spark-2">✸</span>
+                  <span className="bomb-spark spark-3">✹</span>
+                </span>
+              )}
               {piece && (
                 <span className={`piece-face ${piece.player === 'white' ? 'cpu-piece' : 'player-piece'} ${mode}`}>
-                  {mode === 'military' ? <img src={getUnitIcon(piece)} alt="" draggable={false} /> : <span className="shogi-kanji">{getPieceKanji(piece)}</span>}
+                  {mode === 'military' ? <img src={getBattlefieldUnitIcon(piece)} alt="" draggable={false} /> : <span className="shogi-kanji">{getPieceKanji(piece)}</span>}
                   {mode === 'military' && <span className="piece-code">{UNIT_CODE[piece.type]}</span>}
                   {piece.promoted && mode === 'military' && <span className="upgrade-mark">UP</span>}
                 </span>
@@ -155,7 +172,7 @@ function SheetPanel({ sheet, onClose, mode, setMode, advisor }: {
             <div className="guide-grid">
               {PIECE_ORDER.map(type => (
                 <article className="guide-card" key={type}>
-                  <img src={getPieceTypeIcon(type)} alt="" />
+                  <img src={getBattlefieldPieceTypeIcon(type)} alt="" />
                   <div><strong>{PIECE_KANJI[type]} / {UNIT_CODE[type]}</strong><span>{UNIT_NAME_JA[type]}</span><small>{UNIT_NAME_EN[type]}</small></div>
                 </article>
               ))}
