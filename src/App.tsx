@@ -12,7 +12,7 @@ type MobileAdvisor = ReturnType<typeof useMobileAdvisor>;
 const PIECE_ORDER: PieceType[] = ['pawn', 'lance', 'knight', 'silver', 'gold', 'bishop', 'rook', 'king'];
 const GUIDE_CROP_WIDTH = 44.9;
 const GUIDE_CROP_HEIGHT = 18.9;
-const MINI_GUIDE_VISIBLE_MS = 1600;
+const MINI_GUIDE_VISIBLE_MS = 1000;
 
 const GUIDE_REGION: Record<PieceType, { left: number; top: number }> = {
   pawn: { left: 5.1, top: 15.9 },
