@@ -17,7 +17,7 @@ This repository is intentionally separate from the Web version (`HP486379/SHOGIM
 - Full UNIT GUIDE lives behind the bottom `GUIDE` button
 - Bottom battle tools: `AI / GUIDE / SET`
 - SE / RESET move into Settings
-- AI advice will appear as short incoming tactical communications over the play area, with history/manual ANALYZE in the AI sheet
+- AI advice appears as short incoming tactical communications over the play area, with history/manual ANALYZE in the AI sheet
 - CPU pieces rotate 180 degrees in both MILITARY and SHOGI modes
 
 ## Phase 1
@@ -32,8 +32,15 @@ The first implementation establishes a playable portrait battle screen and ports
 - compact captured-piece bars
 - full guide/settings bottom sheets
 - iPhone safe-area aware fixed bottom tools
+- event-driven GPT-5.4 mini advisor
+- short realtime tactical-transmission overlay
+- unread AI indicator and manual ANALYZE sheet
 
-The remote GPT-5.4 mini advisor connection is intentionally left for the next implementation phase, after the mobile play shell is validated on real iPhone dimensions.
+## AI API
+
+The Web preview uses a same-origin Vercel function at `/api/advice`. Set `OPENAI_API_KEY` as a Vercel environment variable; the key is never exposed to the browser.
+
+When the project is later wrapped with Capacitor, the native-app origin / API base URL will be adjusted without embedding the OpenAI key in the app.
 
 ## Development
 
