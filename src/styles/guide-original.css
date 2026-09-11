@@ -15,6 +15,17 @@
   pointer-events: none;
 }
 
+/* mobile.css has a generic `.mini-guide img { width/height: 58px; }` rule for the
+   old icon-based popup. The original UNIT GUIDE crop uses one large source
+   image instead, so force its intrinsic aspect ratio back here. Without this,
+   the source gets squashed to 58px high and the percentage crop lands on an
+   empty black area. */
+.mini-guide-original .guide-art-source {
+  max-width: none !important;
+  height: auto !important;
+  object-fit: initial !important;
+}
+
 .mini-guide-original {
   width: min(228px, 58vw);
   display: block;
