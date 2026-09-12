@@ -87,7 +87,7 @@ function HandBar({ title, hand, cpu, selected, onSelect }: {
 
 function MiniGuide({ piece, pos }: { piece: Piece; pos: Position }) {
   const left = Math.min(76, Math.max(24, ((pos.col + 0.5) / 9) * 100));
-  const below = pos.row <= 3;
+  const below = pos.row <= 6;
   const edge = below ? ((pos.row + 1.12) / 9) * 100 : ((9 - pos.row + 0.12) / 9) * 100;
   const style: CSSProperties = below
     ? { left: `${left}%`, top: `${edge}%` }
