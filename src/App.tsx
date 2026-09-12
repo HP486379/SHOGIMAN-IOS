@@ -153,7 +153,7 @@ function Board({ mode, inspected, onInspect }: {
           );
         }))}
       </div>
-      {inspectedPiece && inspected && <MiniGuide piece={inspectedPiece} pos={inspected} />}
+      {mode === 'military' && inspectedPiece && inspected && <MiniGuide piece={inspectedPiece} pos={inspected} />}
     </div>
   );
 }
