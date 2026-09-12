@@ -13,7 +13,6 @@ const PIECE_ORDER: PieceType[] = ['pawn', 'lance', 'knight', 'silver', 'gold', '
 const GUIDE_CROP_WIDTH = 44.9;
 const GUIDE_CROP_HEIGHT = 18.9;
 const MINI_GUIDE_VISIBLE_MS = 1000;
-const MINI_GUIDE_LAST_BELOW_ROW = 6;
 
 const GUIDE_REGION: Record<PieceType, { left: number; top: number }> = {
   pawn: { left: 5.1, top: 15.9 },
@@ -89,10 +88,11 @@ function HandBar({ title, hand, cpu, selected, onSelect }: {
 function MiniGuide({ piece, pos }: { piece: Piece; pos: Position }) {
   const left = Math.min(76, Math.max(24, ((pos.col + 0.5) / 9) * 100));
 
-  // All military units use the same placement rule, regardless of piece type,
-  // promotion state, or side: prefer the screen-bottom side of the selected unit.
-  // Only the bottom two ranks flip upward to keep the popup inside the board.
-  const showBelow = pos.row <= MINI_GUIDE_LAST_BELOW_ROW;
+  // Put the guide behind the selected unit relative to its advance direction.
+  // 1P (black) advances upward, so the popup goes below the unit.
+  // CPU (white) advances downward, so the popup goes above the unit.
+  // This rule applies to every unit type and promoted unit.
+  const showBelow = piece.player === 'black';
   const edge = showBelow
     ? ((pos.row + 1.12) / 9) * 100
     : ((9 - pos.row + 0.12) / 9) * 100;
