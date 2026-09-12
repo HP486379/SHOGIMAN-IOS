@@ -1,0 +1,188 @@
+@keyframes mobileBombBurst {
+  0% { opacity: 0; transform: scale(.18) rotate(0deg); filter: brightness(1); }
+  8% { opacity: 1; transform: scale(.92) rotate(8deg); filter: brightness(2.8); }
+  18% { opacity: 1; transform: scale(1.65) rotate(-10deg); filter: brightness(2.2); }
+  42% { opacity: .95; transform: scale(2.25) rotate(12deg); filter: brightness(1.55); }
+  72% { opacity: .5; transform: scale(2.75) rotate(-6deg); filter: brightness(1.15); }
+  100% { opacity: 0; transform: scale(3.25) rotate(0deg); filter: brightness(1); }
+}
+
+@keyframes mobileBombCoreFlash {
+  0% { transform: scale(.35); opacity: 0; }
+  10% { transform: scale(1.9); opacity: 1; }
+  28% { transform: scale(1.2); opacity: 1; }
+  52% { transform: scale(2.6); opacity: .65; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+@keyframes mobileBombShockwave {
+  0% { opacity: 0; transform: scale(.25); border-width: 6px; }
+  12% { opacity: 1; transform: scale(.75); border-width: 5px; }
+  55% { opacity: .62; transform: scale(2.15); border-width: 3px; }
+  100% { opacity: 0; transform: scale(3.1); border-width: 1px; }
+}
+
+@keyframes mobileSpark1 {
+  from { opacity: 1; transform: translate(0,0) scale(1); }
+  to { opacity: 0; transform: translate(-52px,-44px) scale(.35) rotate(180deg); }
+}
+@keyframes mobileSpark2 {
+  from { opacity: 1; transform: translate(0,0) scale(1); }
+  to { opacity: 0; transform: translate(56px,-34px) scale(.35) rotate(-180deg); }
+}
+@keyframes mobileSpark3 {
+  from { opacity: 1; transform: translate(0,0) scale(1); }
+  to { opacity: 0; transform: translate(14px,58px) scale(.35) rotate(220deg); }
+}
+
+@keyframes mobileBoardShake {
+  0%, 100% { transform: translate(0,0); }
+  12% { transform: translate(-3px,2px); }
+  25% { transform: translate(4px,-3px); }
+  38% { transform: translate(-4px,-1px); }
+  52% { transform: translate(3px,3px); }
+  68% { transform: translate(-2px,2px); }
+  82% { transform: translate(1px,-1px); }
+}
+
+@keyframes mobileScreenFlash {
+  0% { opacity: 0; }
+  8% { opacity: .38; }
+  20% { opacity: .15; }
+  100% { opacity: 0; }
+}
+
+.board-wrap:has(.bomb-explosion) .board {
+  animation: mobileBoardShake .46s steps(2,end);
+}
+
+.ios-shell:has(.bomb-explosion)::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255,255,255,.48) 0%, rgba(255,190,0,.24) 18%, rgba(255,60,0,.10) 36%, rgba(0,0,0,0) 62%);
+  animation: mobileScreenFlash .58s ease-out forwards;
+}
+
+.bomb-explosion {
+  position: absolute;
+  inset: -48px;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  animation: mobileBombBurst .82s cubic-bezier(.1,.82,.18,1) forwards;
+  background:
+    radial-gradient(circle at 48% 48%, #fff 0%, rgba(255,255,255,.98) 7%, rgba(255,245,100,.96) 15%, rgba(255,132,0,.94) 27%, rgba(230,20,0,.82) 42%, rgba(82,0,0,.58) 58%, transparent 74%),
+    conic-gradient(from 20deg, transparent, rgba(255,255,255,.85), transparent, rgba(255,238,0,.92), transparent, rgba(255,255,255,.72), transparent);
+}
+
+.bomb-explosion::before,
+.bomb-explosion::after {
+  content: '';
+  position: absolute;
+  inset: 15px;
+  border-radius: 50%;
+  border: 5px solid rgba(255,238,0,.88);
+  box-shadow: 0 0 15px #fff, 0 0 28px #ff6600, inset 0 0 16px #ff3300;
+  animation: mobileBombShockwave .82s ease-out forwards;
+}
+.bomb-explosion::after {
+  inset: 28px;
+  border-color: rgba(255,255,255,.88);
+  animation-delay: .08s;
+}
+
+.bomb-core {
+  position: absolute;
+  color: #fff;
+  font-size: 28px;
+  text-shadow: 0 0 10px #fff, 0 0 24px #ffee00, 0 0 36px #ff3300;
+  animation: mobileBombCoreFlash .82s ease-out forwards;
+}
+.bomb-spark {
+  position: absolute;
+  color: #ffee55;
+  font-size: 22px;
+  text-shadow: 0 0 8px #fff, 0 0 15px #ff6600, 0 0 24px #ff0000;
+}
+.spark-1 { animation: mobileSpark1 .72s ease-out forwards; }
+.spark-2 { animation: mobileSpark2 .72s ease-out forwards; }
+.spark-3 { animation: mobileSpark3 .72s ease-out forwards; }
+
+.effect-marker {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  font-size: clamp(12px, 3.4vw, 20px);
+  font-weight: 900;
+  text-shadow: 0 0 8px currentColor;
+}
+.effect-marker.capture { color: #ff4b3d; }
+.effect-marker.flame { color: #ffb235; }
+.effect-marker.cross { color: #54d8ff; }
+.effect-marker.diagonal { color: #61f0a4; }
+
+/* Keep the Web version's battlefield identity while retaining the new mobile layout. */
+.board {
+  background:
+    radial-gradient(circle at 17% 19%, rgba(40,31,20,.34) 0 7px, transparent 8px),
+    radial-gradient(circle at 78% 31%, rgba(18,17,13,.28) 0 9px, transparent 10px),
+    radial-gradient(circle at 41% 72%, rgba(64,48,26,.30) 0 8px, transparent 9px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 2px, rgba(0,0,0,.03) 2px 5px),
+    linear-gradient(180deg, #7b683c 0%, #665530 48%, #534624 100%) !important;
+  border-color: #4a3a22 !important;
+  box-shadow: 0 0 0 2px #211a11, 0 0 20px rgba(95,85,48,.34), 3px 3px 0 #17120b !important;
+}
+.board-cell {
+  background-color: transparent !important;
+  border-color: rgba(42,34,19,.88) !important;
+}
+.board-cell:nth-child(even) { background: rgba(129,111,62,.10) !important; }
+.board-cell:nth-child(odd) { background: rgba(80,67,35,.08) !important; }
+.board-cell.selected {
+  outline: 2px solid #ffee00 !important;
+  box-shadow: inset 0 0 0 2px rgba(255,238,0,.30), 0 0 10px rgba(255,238,0,.45);
+}
+.board-cell.last-move {
+  box-shadow: inset 0 0 0 2px #ffe21f, inset 0 0 15px rgba(255,216,30,.44) !important;
+}
+
+.piece-face img {
+  width: 104% !important;
+  height: 104% !important;
+  filter: drop-shadow(2px 3px 2px rgba(0,0,0,.82)) contrast(1.05);
+}
+.player-piece img { filter: drop-shadow(2px 3px 2px rgba(0,0,0,.82)) saturate(1.08) brightness(1.03); }
+.cpu-piece img { filter: drop-shadow(2px 3px 2px rgba(0,0,0,.82)) hue-rotate(188deg) saturate(.95) brightness(.98); }
+
+.shogi-kanji {
+  color: #fff1b8 !important;
+  font-family: 'Noto Serif JP','Yu Mincho','Hiragino Mincho Pro',serif !important;
+  font-size: clamp(22px,7vw,36px) !important;
+  -webkit-text-stroke: .7px rgba(22,12,0,.96);
+  text-shadow: 1px 0 1px #000,-1px 0 1px #000,0 1px 1px #000,0 -1px 1px #000,0 0 5px rgba(255,221,85,.7) !important;
+}
+.cpu-piece.shogi .shogi-kanji {
+  color: #dcecff !important;
+  -webkit-text-stroke-color: rgba(0,14,28,.96);
+  text-shadow: 1px 0 1px #000,-1px 0 1px #000,0 1px 1px #000,0 -1px 1px #000,0 0 5px rgba(102,170,255,.75) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-wrap:has(.bomb-explosion) .board,
+  .ios-shell:has(.bomb-explosion)::after,
+  .bomb-explosion,
+  .bomb-explosion::before,
+  .bomb-explosion::after,
+  .bomb-core,
+  .bomb-spark { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}

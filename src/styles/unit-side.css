@@ -1,0 +1,15 @@
+.piece-face.player-piece.military img {
+  filter: drop-shadow(2px 3px 2px rgba(0, 0, 0, .78)) saturate(1.1) brightness(1.05);
+}
+
+.piece-face.cpu-piece.military img {
+  filter: drop-shadow(2px 3px 2px rgba(0, 0, 0, .8)) hue-rotate(188deg) saturate(.95) brightness(.98);
+}
+
+.piece-face.player-piece.military:has(.upgrade-mark) img {
+  filter: drop-shadow(2px 3px 2px rgba(0, 0, 0, .82)) saturate(1.35) brightness(1.16);
+}
+
+.piece-face.cpu-piece.military:has(.upgrade-mark) img {
+  filter: drop-shadow(2px 3px 2px rgba(0, 0, 0, .85)) hue-rotate(188deg) saturate(1.1) brightness(1.08);
+}

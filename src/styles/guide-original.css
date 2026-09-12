@@ -1,0 +1,106 @@
+.guide-art-crop {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1.9 / 1;
+  background: #050604;
+}
+
+.guide-art-source {
+  position: absolute;
+  max-width: none;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* mobile.css has a generic `.mini-guide img { width/height: 58px; }` rule for the
+   old icon-based popup. The original UNIT GUIDE crop uses one large source
+   image instead, so force its intrinsic aspect ratio back here. Without this,
+   the source gets squashed to 58px high and the percentage crop lands on an
+   empty black area. */
+.mini-guide-original .guide-art-source {
+  max-width: none !important;
+  height: auto !important;
+  object-fit: initial !important;
+}
+
+.mini-guide-original {
+  width: min(228px, 58vw);
+  display: block;
+  padding: 0;
+  overflow: visible;
+  border: 2px solid #ffea4a;
+  border-radius: 8px;
+  background: #080a04;
+  box-shadow:
+    0 0 10px #fff266,
+    0 0 24px #ffd000,
+    inset 0 0 18px rgba(255, 242, 80, .24);
+}
+
+.mini-guide-original .mini-guide-art {
+  border-radius: 6px;
+}
+
+.mini-guide-original::after {
+  background: #080a04;
+  border-color: #ffea4a;
+}
+
+.mini-guide-upgrade {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  z-index: 4;
+  padding: 3px 5px;
+  border: 1px solid #ff6a42;
+  background: rgba(35, 5, 1, .94);
+  color: #ff8b63;
+  font-size: 7px;
+  box-shadow: 0 0 8px rgba(255, 75, 40, .5);
+}
+
+.full-guide-image-wrap {
+  position: relative;
+  width: min(100%, 430px);
+  margin: 0 auto;
+}
+
+.full-guide-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 0 14px rgba(210, 190, 0, .58));
+}
+
+.full-guide-highlight {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  border: 3px solid #ffea4a;
+  border-radius: 7px;
+  background: rgba(255, 238, 70, .13);
+  box-shadow:
+    0 0 10px #fff266,
+    0 0 24px #ffd000,
+    inset 0 0 18px rgba(255, 242, 80, .45);
+  pointer-events: none;
+  animation: mobileGuidePulse .85s steps(2, end) infinite;
+}
+
+@keyframes mobileGuidePulse {
+  0%, 100% { opacity: 1; filter: brightness(1.2); }
+  50% { opacity: .48; filter: brightness(1.9); }
+}
+
+@media (max-width: 380px) {
+  .mini-guide-original { width: min(210px, 62vw); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .full-guide-highlight { animation: none; }
+}

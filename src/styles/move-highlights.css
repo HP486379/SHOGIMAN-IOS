@@ -1,0 +1,55 @@
+@keyframes legalTargetPulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.28); }
+}
+
+.board-cell.legal-target {
+  position: relative;
+  animation: legalTargetPulse .72s steps(2, end) infinite;
+}
+
+.board-cell.effect-flame {
+  background: rgba(255, 135, 20, .34) !important;
+  box-shadow: inset 0 0 0 2px rgba(255, 174, 47, .75), inset 0 0 18px rgba(255, 130, 0, .58) !important;
+}
+
+.board-cell.effect-capture {
+  background: rgba(255, 30, 30, .37) !important;
+  box-shadow: inset 0 0 0 2px rgba(255, 65, 55, .88), inset 0 0 20px rgba(255, 20, 0, .68) !important;
+}
+
+.board-cell.effect-cross {
+  background: rgba(0, 190, 255, .33) !important;
+  box-shadow: inset 0 0 0 2px rgba(68, 216, 255, .9), inset 0 0 20px rgba(0, 171, 255, .58) !important;
+}
+
+.board-cell.effect-diagonal {
+  background: rgba(38, 238, 143, .31) !important;
+  box-shadow: inset 0 0 0 2px rgba(83, 255, 167, .86), inset 0 0 20px rgba(24, 220, 126, .55) !important;
+}
+
+.effect-marker {
+  z-index: 12 !important;
+  opacity: .96;
+  font-size: clamp(15px, 4.4vw, 24px) !important;
+}
+
+.board-cell.effect-capture .effect-marker {
+  text-shadow: 0 0 5px #fff, 0 0 12px #ff3322, 0 0 20px #ff0000;
+}
+
+.board-cell.effect-cross .effect-marker {
+  text-shadow: 0 0 5px #fff, 0 0 12px #45d9ff, 0 0 20px #009dff;
+}
+
+.board-cell.effect-diagonal .effect-marker {
+  text-shadow: 0 0 5px #fff, 0 0 12px #55f7aa, 0 0 20px #00c871;
+}
+
+.board-cell.effect-flame .effect-marker {
+  text-shadow: 0 0 5px #fff, 0 0 12px #ffc14d, 0 0 20px #ff7a00;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-cell.legal-target { animation: none; }
+}
